@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Spinner Bug</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+</head>
+<body>
+    <h1>CORS Spinner Bug</h1>
+
+    <p>Background info: <a href="http://www.thecssninja.com/javascript/ios6-spinner">iOS6 network activity spinner and CORS</a></p>
+
+    <p>CORS requires preflight requests for POST requests that have a Content-Type header that is <em>not</em> application/x-www-form-urlencoded, multipart/form-data, or text/plain.</p>
+
+    <p>To test this, click all three buttons. If you see a JSON object alerted after each click, the request succeeded.</p>
+
+    <p><button id="doGet">Do GET for application/json</button></p>
+    <p><button id="doPostPlain">Do POST with text/plain</button></p>
+    <p><button id="doPostJson">Do POST with application/json</button></p>
+
+    <p>After clicking the first two buttons (and closing the alert), the iOS6 spinner stops as it should.</p>
+
+    <p>After clicking the third button, the iOS6 spinner never stops (until you close the tab or the app if it's on your home screen). Look at the network panel to see two requests: the preflight request (method is OPTIONS) and the actual request (method is POST). The preflight request is what triggers the bug.</p>
+
+    <p>For apps on your home screen, the spinner never stops until you reboot the device. In Safari, you can at least close and reopen the tab.</p>
+
+    <script src="http://code.jquery.com/jquery.js"></script>
+
+    <script>
+        var origin =
+            location.protocol + '//' +
+            location.hostname + ':' + (+location.port + 1) +
+            '/data';
+
+        $('#doGet').click(function(e) {
+            e.preventDefault();
+
+            $.get(origin).then(function(res) {
+                alert(JSON.stringify(res));
+            });
+        });
+
+        $('#doPostJson').click(function(e) {
+            e.preventDefault();
+
+            $.ajax(origin, {
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ bar: 43 }),
+                dataType: 'json'
+            }).then(function(res) {
+                alert(JSON.stringify(res));
+            });
+        });
+
+        $('#doPostPlain').click(function(e) {
+            e.preventDefault();
+
+            $.ajax(origin, {
+                type: 'POST',
+                contentType: 'text/plain',
+                data: JSON.stringify({ baz: 44 }),
+                dataType: 'json'
+            }).then(function(res) {
+                alert(JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>
