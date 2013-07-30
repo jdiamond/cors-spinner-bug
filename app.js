@@ -9,27 +9,32 @@ var app = express();
 
 app.set('port', +process.env.PORT || 3000);
 app.use(express.logger('dev'));
+app.use(express.cookieParser());
 app.use(express.bodyParser());
-app.use(express.methodOverride());
 
 app.get('/', function(req, res) {
     return res.sendfile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/data', function(req, res) {
-    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Origin', req.get('Origin'));
+    res.set('Access-Control-Allow-Credentials', 'true');
+    res.cookie('cookie', 'value');
     return res.json({ foo: 42 });
 });
 
 app.options('/data', function(req, res) {
-    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Origin', req.get('Origin'));
+    res.set('Access-Control-Allow-Credentials', 'true');
     res.set('Access-Control-Allow-Methods', 'POST');
     res.set('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).send();
 });
 
 app.post('/data', function(req, res) {
-    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Origin', req.get('Origin'));
+    res.set('Access-Control-Allow-Credentials', 'true');
+    console.log(req.cookies.cookie);
     return res.json(req.body);
 });
 
